@@ -78,15 +78,6 @@ func newDESStream(key, iv []byte, doe DecOrEnc) (cipher.Stream, error) {
 	return newStream(block, err, key, iv, doe)
 }
 
-func newBlowFishStream(key, iv []byte, doe DecOrEnc) (cipher.Stream, error) {
-	block, err := blowfish.NewCipher(key)
-	return newStream(block, err, key, iv, doe)
-}
-
-func newCast5Stream(key, iv []byte, doe DecOrEnc) (cipher.Stream, error) {
-	block, err := cast5.NewCipher(key)
-	return newStream(block, err, key, iv, doe)
-}
 
 func newRC4MD5Stream(key, iv []byte, _ DecOrEnc) (cipher.Stream, error) {
 	h := md5.New()
@@ -111,8 +102,6 @@ var cipherMethod = map[string]*cipherInfo{
 	"aes-192-ctr": {24, 16, newAESCTRStream},
 	"aes-256-ctr": {32, 16, newAESCTRStream},
 	"des-cfb":     {8, 8, newDESStream},
-	"bf-cfb":      {16, 8, newBlowFishStream},
-	"cast5-cfb":   {16, 8, newCast5Stream},
 	"rc4-md5":     {16, 16, newRC4MD5Stream},
 	"rc4-md5-6":   {16, 6, newRC4MD5Stream},
 }

@@ -4,6 +4,9 @@ import (
 	"encoding/binary"
 	"errors"
 	"fmt"
+	"regexp"
+	"strconv"
+	"strings"
 )
 
 type AddrInfo struct {
@@ -30,5 +33,25 @@ func ParseAddrInfo(buf []byte) (*AddrInfo, error) {
 
 	default:
 		return nil, errors.New("invalid atyp")
+	}
+}
+
+func BuildSocks5AddrData(hostname, port string) []byte {
+	portVal, _ := strconv.Atoi(port)
+	match, _ := regexp.MatchString(`^(\d+\.){3}\d+$`, hostname)
+	if match {
+		vals := strings.Split(hostname, ".")
+		s1, _ := strconv.Atoi(vals[0])
+		s2, _ := strconv.Atoi(vals[1])
+		s3, _ := strconv.Atoi(vals[2])
+		s4, _ := strconv.Atoi(vals[3])
+		return []byte{0x01, uint8(s1), uint8(s2), uint8(s3), uint8(s4), uint8(portVal >> 8), uint8(portVal % 256)}
+	} else {
+		domainlen := len(hostname)
+		ret := []byte{0x03, uint8(domainlen)}
+		domainbyte := []byte(hostname)
+		ret = append(ret, domainbyte...)
+		ret = append(ret, uint8(portVal>>8), uint8(portVal%256))
+		return ret
 	}
 }

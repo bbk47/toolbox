@@ -1,9 +1,7 @@
-
 package toolbox
 
 import (
 	"fmt"
-	"strconv"
 	"time"
 )
 
@@ -14,7 +12,7 @@ func GetBytesHex(buf []byte) string {
 
 func GetNowInt64Bytes() []byte {
 	timest := time.Now().UnixNano() / 1e6
-	//tstr := fmt.Sprintf("%v", timest)
-	tstr := strconv.Itoa(int(timest))
+	tstr := fmt.Sprintf("%v", timest)
+	// tstr := strconv.Itoa(int(timest))
 	return []byte(tstr)
 }

@@ -170,3 +170,19 @@ func (ee *Encryptor) Decrypt(buf []byte) (data []byte, err error) {
 	dec.XORKeyStream(buf, buf)
 	return buf, nil
 }
+
+// IVLen 返回当前加密方法所需的 IV 字节数，供调用方生成随机 IV。
+func (ee *Encryptor) IVLen() int {
+	return ee.cipher.info.ivLen
+}
+
+// NewEncStream 用给定 iv 构造一条连续的加密流，用于整条连接的流式加密
+// （区别于 Encrypt：不重置、不复用固定 IV，调用方持有该流持续 XOR）。
+func (ee *Encryptor) NewEncStream(iv []byte) (cipher.Stream, error) {
+	return ee.cipher.info.newStream(ee.key, iv, Encrypt)
+}
+
+// NewDecStream 用给定 iv 构造一条连续的解密流，与对端的加密流配对。
+func (ee *Encryptor) NewDecStream(iv []byte) (cipher.Stream, error) {
+	return ee.cipher.info.newStream(ee.key, iv, Decrypt)
+}

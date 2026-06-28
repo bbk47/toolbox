@@ -3,7 +3,9 @@ package toolbox
 import (
 	"crypto/aes"
 	"crypto/cipher"
+	"crypto/des"
 	"crypto/md5"
+	"crypto/rc4"
 	"errors"
 )
 
@@ -71,6 +73,21 @@ func newAESCTRStream(key, iv []byte, doe DecOrEnc) (cipher.Stream, error) {
 	return cipher.NewCTR(block, iv), nil
 }
 
+func newDESStream(key, iv []byte, doe DecOrEnc) (cipher.Stream, error) {
+	block, err := des.NewCipher(key)
+	return newStream(block, err, key, iv, doe)
+}
+
+
+func newRC4MD5Stream(key, iv []byte, _ DecOrEnc) (cipher.Stream, error) {
+	h := md5.New()
+	h.Write(key)
+	h.Write(iv)
+	rc4key := h.Sum(nil)
+
+	return rc4.NewCipher(rc4key)
+}
+
 type cipherInfo struct {
 	keyLen    int
 	ivLen     int
@@ -84,6 +101,9 @@ var cipherMethod = map[string]*cipherInfo{
 	"aes-128-ctr": {16, 16, newAESCTRStream},
 	"aes-192-ctr": {24, 16, newAESCTRStream},
 	"aes-256-ctr": {32, 16, newAESCTRStream},
+	"des-cfb":     {8, 8, newDESStream},
+	"rc4-md5":     {16, 16, newRC4MD5Stream},
+	"rc4-md5-6":   {16, 6, newRC4MD5Stream},
 }
 
 type Cipher struct {
